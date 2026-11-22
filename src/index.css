@@ -1,0 +1,120 @@
+@import "tailwindcss";
+@source "./components";
+@source "./lib";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./styles/cdl-tokens.css";
+@import "./themes/compass.css";
+
+@font-face {
+  font-family: "FK Grotesk";
+  src: url("./assets/fonts/FK Grotesk/FKGrotesk-Thin.otf") format("opentype");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "FK Grotesk";
+  src: url("./assets/fonts/FK Grotesk/FKGrotesk-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "FK Grotesk";
+  src: url("./assets/fonts/FK Grotesk/FKGrotesk-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "FK Grotesk";
+  src: url("./assets/fonts/FK Grotesk/FKGrotesk-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "FK Grotesk";
+  src: url("./assets/fonts/FK Grotesk/FKGrotesk-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "FK Grotesk";
+  src: url("./assets/fonts/FK Grotesk/FKGrotesk-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+html, body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+@theme {
+  --font-sans: "FK Grotesk", system-ui, sans-serif;
+}
+
+/*
+ * CDL's base tokens (@theme color/radius maps, :root, .dark) live in
+ * ./styles/cdl-tokens.css — imported above. That file is mirrored verbatim from the
+ * Compass Design Library (the source of truth) by `npm run sync:cdl-primitives`, so
+ * the palette here always matches CDL. Don't hand-edit token values here; change them
+ * in CDL and re-sync. Project-specific CSS (fonts, brand theme, base layer) stays here.
+ */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.70 0 0) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+    border: none;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: oklch(0.70 0 0);
+    border-radius: 999px;
+    border: none;
+  }
+  .dark *::-webkit-scrollbar-thumb {
+    background-color: oklch(0.35 0 0);
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html,
+  body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* An inner scroller keeps its overscroll to itself. */
+  main,
+  [data-radix-scroll-area-viewport] {
+    overscroll-behavior: contain;
+  }
+}

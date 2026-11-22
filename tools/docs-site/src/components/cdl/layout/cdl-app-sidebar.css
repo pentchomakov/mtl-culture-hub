@@ -1,0 +1,4 @@
+[data-slot="sidebar-menu-button"][data-active="true"] {
+  border: 1px solid var(--sidebar-border);
+  font-weight: 400;
+}

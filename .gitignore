@@ -221,3 +221,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# spec-init: node deps/build output
+node_modules/
+dist/
+tools/*/node_modules/
+tools/*/dist/

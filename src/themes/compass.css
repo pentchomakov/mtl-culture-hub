@@ -1,0 +1,27 @@
+/* Compass theme — blue palette ranging from sky to navy. */
+html[data-theme="compass"] {
+    --primary: oklch(0.25 0.06 238);
+    --primary-foreground: oklch(0.985 0 0);
+    --accent: oklch(0.94 0.05 235);
+    --accent-foreground: oklch(0.35 0.20 235);
+    --ring: oklch(0.25 0.06 238);
+    --sidebar-primary: oklch(0.25 0.06 238);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-ring: oklch(0.25 0.06 238);
+    --chart-1: oklch(0.52 0.21 235);
+    --chart-2: oklch(0.68 0.16 218);
+    --chart-3: oklch(0.42 0.18 255);
+    --chart-4: oklch(0.73 0.11 240);
+    --chart-5: oklch(0.35 0.17 250);
+}
+
+html[data-theme="compass"].dark {
+    --primary: oklch(0.25 0.06 238);
+    --primary-foreground: oklch(0.985 0 0);
+    --accent: oklch(0.28 0.08 235);
+    --accent-foreground: oklch(0.75 0.15 235);
+    --ring: oklch(0.25 0.06 238);
+    --sidebar-primary: oklch(0.25 0.06 238);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-ring: oklch(0.25 0.06 238);
+}

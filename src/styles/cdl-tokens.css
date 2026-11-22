@@ -1,0 +1,313 @@
+/**
+ * CDL design tokens — the shared color palette, surface/radius scales, animation
+ * keyframes, and the @theme maps that make utility classes (bg-primary,
+ * text-muted-foreground, animate-shimmer, …) exist.
+ *
+ * This file is the SOURCE OF TRUTH for CDL's base tokens. It is mirrored verbatim into
+ * consuming projects (the compass-app-template sync writes it to src/styles/cdl-tokens.css
+ * and imports it from index.css), exactly like a primitive. Keep it free of anything
+ * project-specific — no @source paths, no @font-face, no brand-theme imports. Those
+ * stay in each project's index.css. Brand themes (data-theme overlays) layer on top.
+ */
+
+@theme inline {
+    --color-surface-default:       var(--surface-default);
+    --color-surface-hover:         var(--surface-hover);
+    --color-surface-selected:      var(--surface-selected);
+    --color-surface-selected-hover: var(--surface-selected-hover);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: calc(var(--radius) + 8px);
+    --radius-3xl: calc(var(--radius) + 12px);
+    --radius-4xl: calc(var(--radius) + 16px);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+    --radius: 0.625rem;
+    --neutral-0:   oklch(1 0 0);
+    --neutral-100: oklch(0.985 0 0);
+    --neutral-200: oklch(0.97 0 0);
+    --neutral-300: oklch(0.96 0 0);
+    --neutral-400: oklch(0.922 0 0);
+    --neutral-600: oklch(0.269 0 0);
+    --neutral-700: oklch(0.22 0 0);
+    --neutral-800: oklch(0.205 0 0);
+    --neutral-900: oklch(0.185 0 0);
+    --neutral-950: oklch(0.145 0 0);
+    --surface-default:        var(--neutral-0);
+    --surface-hover:          var(--neutral-100);
+    --surface-selected:       var(--neutral-300);
+    --surface-selected-hover: var(--neutral-400);
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: #333333;
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.94 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.985 0 0);
+    --success: oklch(0.527 0.154 150);
+    --success-foreground: oklch(0.985 0 0);
+    --warning: oklch(0.769 0.177 70);
+    --warning-foreground: oklch(0.145 0 0);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --chart-1: oklch(0.205 0 0);
+    --chart-2: oklch(0.44 0 0);
+    --chart-3: oklch(0.60 0 0);
+    --chart-4: oklch(0.75 0 0);
+    --chart-5: oklch(0.87 0 0);
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+}
+
+/*
+ * Mirrors :root's values so a nested ".light" scope (e.g. a component
+ * preview forced to light mode) can override an ancestor ".dark" — :root
+ * only wins at the document root, it doesn't out-cascade a closer .dark.
+ */
+.light {
+    --background: oklch(1 0 0);
+    --surface-default:        var(--neutral-0);
+    --surface-hover:          var(--neutral-100);
+    --surface-selected:       var(--neutral-300);
+    --surface-selected-hover: var(--neutral-400);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: #333333;
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.94 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.985 0 0);
+    --success: oklch(0.527 0.154 150);
+    --success-foreground: oklch(0.985 0 0);
+    --warning: oklch(0.769 0.177 70);
+    --warning-foreground: oklch(0.145 0 0);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --chart-1: oklch(0.205 0 0);
+    --chart-2: oklch(0.44 0 0);
+    --chart-3: oklch(0.60 0 0);
+    --chart-4: oklch(0.75 0 0);
+    --chart-5: oklch(0.87 0 0);
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+    --background: oklch(0.145 0 0);
+    --surface-default:        var(--neutral-950);
+    --surface-hover:          var(--neutral-900);
+    --surface-selected:       var(--neutral-700);
+    --surface-selected-hover: var(--neutral-600);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --destructive-foreground: oklch(0.145 0 0);
+    --success: oklch(0.65 0.154 150);
+    --success-foreground: oklch(0.145 0 0);
+    --warning: oklch(0.85 0.177 70);
+    --warning-foreground: oklch(0.145 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.90 0 0);
+    --chart-2: oklch(0.75 0 0);
+    --chart-3: oklch(0.55 0 0);
+    --chart-4: oklch(0.40 0 0);
+    --chart-5: oklch(0.25 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+}
+
+/**
+ * Animations — CDL-authored keyframes plus the @theme tokens that expose them as
+ * utilities (animate-shimmer, animate-collapsible-down, …).
+ *
+ * These live here rather than in a project's index.css so they travel with the
+ * mirrored token file. CdlSkeleton's shimmer and CdlAppSidebar's collapsible nav
+ * sections reference these classes, so a consuming project that only receives
+ * cdl-tokens.css would otherwise render them with no animation at all.
+ */
+
+@theme inline {
+    --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+    --animate-collapsible-down: collapsible-down 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-collapsible-up: collapsible-up 160ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-icon-in: icon-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-flash-tint: flash-tint 1s ease-out;
+    --animate-wiggle: wiggle 500ms ease-in-out;
+}
+
+/* Icon swap entrance — for icons that conditionally mount on state change */
+@keyframes icon-in {
+  from { opacity: 0; transform: scale(0.75); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Skeleton / loading shimmer */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Collapsible expand / collapse (uses Radix CSS variable) */
+@keyframes collapsible-down {
+  from { height: 0; opacity: 0.6; }
+  to   { height: var(--radix-collapsible-content-height); opacity: 1; }
+}
+
+@keyframes collapsible-up {
+  from { height: var(--radix-collapsible-content-height); opacity: 1; }
+  to   { height: 0; opacity: 0.6; }
+}
+
+/* One-shot blue tint — briefly highlights a card jumped to via an in-page
+   anchor link (e.g. the alert banner's "Review feeds" action). A
+   semi-transparent overlay rather than a solid color swap, so it reads
+   correctly layered over the card's own background in both light and dark
+   themes. */
+@keyframes flash-tint {
+  from { background-color: oklch(0.6 0.2 250 / 18%); }
+  to   { background-color: oklch(0.6 0.2 250 / 0%); }
+}
+
+/* Playful hover wiggle — used by the components catalog's category icons */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25%      { transform: rotate(-8deg) scale(1.05); }
+  75%      { transform: rotate(8deg) scale(1.05); }
+}
+
+/* The page itself never rubber-bands or swipe-navigates back/forward. Scrollers inside the page carry
+   `overscroll-none` on their own class (or an axis-specific one for a horizontal scroller, so a table
+   or tab strip doesn't stop the page scrolling under the pointer). */
+html, body {
+  overscroll-behavior: none;
+}
+
+/*
+ * Menu highlight — the theme's hover grey, not its accent.
+ *
+ * A brand theme can define --hover / --hover-foreground so that a highlighted
+ * menu row reads as a neutral grey instead of the brand accent (pale blue in
+ * McKesson). The select, dropdown and command primitives in components/ui are
+ * shadcn-owned and hardcode `focus:bg-accent`, so the highlight is redirected
+ * here instead of editing them.
+ *
+ * `var(--hover, var(--accent))` means a theme that defines --hover gets its
+ * grey, and a theme that does not (Compass) resolves to --accent, exactly as the
+ * primitives already paint it.
+ *
+ * Deliberately unlayered: Tailwind's utilities sit in @layer utilities, and an
+ * unlayered rule beats every layered rule regardless of specificity, so this
+ * wins over `focus:bg-accent` without !important. The same rule would also beat
+ * a caller's own `focus:text-*` / `focus:bg-*`, so a destructive row is left
+ * alone: it carries `data-variant="destructive"` and keeps its red wash. Set a
+ * destructive item with `variant="destructive"`, never a manual class.
+ *
+ * Radix marks the active item with [data-highlighted] and also focuses it; cmdk
+ * uses [data-selected="true"].
+ */
+[data-slot="select-item"]:focus,
+[data-slot="select-item"][data-highlighted],
+[data-slot="dropdown-menu-item"]:focus,
+[data-slot="dropdown-menu-item"][data-highlighted],
+[data-slot="dropdown-menu-checkbox-item"]:focus,
+[data-slot="dropdown-menu-checkbox-item"][data-highlighted],
+[data-slot="dropdown-menu-radio-item"]:focus,
+[data-slot="dropdown-menu-radio-item"][data-highlighted],
+[data-slot="dropdown-menu-sub-trigger"]:focus,
+[data-slot="dropdown-menu-sub-trigger"][data-highlighted],
+[data-slot="dropdown-menu-sub-trigger"][data-state="open"],
+[data-slot="command-item"][data-selected="true"] {
+  &:not([data-variant="destructive"]) {
+    background-color: var(--hover, var(--accent));
+    color: var(--hover-foreground, var(--accent-foreground));
+  }
+}

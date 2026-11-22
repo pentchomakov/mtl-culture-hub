@@ -1,0 +1,48 @@
+{
+  "name": "docs-site",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Local, config-driven documentation portal on the Compass Design Library shell. Renders every repo doc. Run: npm run docs",
+  "scripts": {
+    "docs": "vite",
+    "dev": "vite",
+    "build": "node scripts/check-workflows.mjs && tsc -b && vite build",
+    "build:cloud": "PORTAL_TARGET=cloud npm run build",
+    "preview": "vite preview",
+    "predeploy": "node scripts/predeploy-guard.mjs && ALLOW_BOARD_DRIFT=1 npm run check:board",
+    "sync:cdl": "node scripts/sync-cdl-tokens.mjs",
+    "check:trunk": "node scripts/check-trunk-from-integration.mjs",
+    "check:workflows": "node scripts/check-workflows.mjs",
+    "check:board": "node scripts/check-board-matches-deploy.mjs"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
+    "@tailwindcss/typography": "^0.5.20",
+    "@tailwindcss/vite": "^4.3.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "highlight.js": "^11.10.0",
+    "lucide-react": "^1.27.0",
+    "mermaid": "^11.4.0",
+    "motion": "^12.43.0",
+    "radix-ui": "^1.6.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^9.1.0",
+    "react-router-dom": "^7.18.2",
+    "remark-gfm": "^4.0.1",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.0"
+  }
+}

@@ -1,0 +1,27 @@
+.cdl-data-table-scroll,
+.cdl-data-table-scroll [data-slot="table-container"] {
+  overscroll-behavior-x: none;
+}
+
+/* The Y lock applies only while the table actually overflows vertically; the
+ * component sets data-y-overflow on the root from a ResizeObserver. A scrollable
+ * table with nothing to scroll leaves overscroll at its default, so a wheel over
+ * it still scrolls the page. */
+.cdl-data-table-scroll-y[data-y-overflow],
+.cdl-data-table-scroll-y[data-y-overflow] [data-slot="table-container"] {
+  overscroll-behavior-y: none;
+}
+
+/* Fill mode: make the shadcn table-container fill its parent height (filler-row mode). */
+.cdl-table-fill-height [data-slot="table-container"] {
+  height: 100%;
+}
+
+/* alwaysShowScrollbar: hide the native scrollbar so the component's own one replaces it. */
+.cdl-table-always-scroll [data-slot="table-container"] {
+  overflow-x: scroll;
+  scrollbar-width: none;
+}
+.cdl-table-always-scroll [data-slot="table-container"]::-webkit-scrollbar {
+  display: none;
+}

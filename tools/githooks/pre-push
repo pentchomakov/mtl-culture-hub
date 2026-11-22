@@ -1,0 +1,164 @@
+#!/bin/sh
+#
+# Two refusals, both about the release branch. Installed by tools/githooks/install.sh.
+#
+#   1. the board must not claim something the audience cannot see  (a push of the integration
+#      branch)
+#   2. the trunk must only ever receive content that came through the integration branch, and
+#      only while the automation that publishes it is intact  (a push of the trunk)
+#
+# WHY THIS IS A HOOK. The published statuses mean "this is live on the deployed surface". The
+# failure mode is quiet: tickets promoted on the integration branch and left there, with no
+# merge to the trunk and no deploy. Nothing fails, because nothing is looking. A delivery record
+# that can be wrong about what the audience has is not a delivery record.
+#
+# SCOPE, deliberately narrow:
+#   · only on a push of the integration branch, where ticket status lives. Feature branches
+#     carry content and never edit their own status, so they are untouched.
+#   · a push carrying BOTH branches is refused outright (see below): the integration branch goes
+#     first, on its own, so CI reliably creates the run that checks it.
+#
+# WHY THE TRUNK REFUSAL IS HERE AND NOT ONLY IN CI. A workflow runs after the push, so the
+# earliest anything server-side can do is refuse to *deploy* what already landed. This hook is
+# the only layer that stops the commit arriving at all. It is also the layer a coding agent meets
+# first: `git push origin <trunk>` from a feature branch fails here, with the reason, before
+# anything reaches the deployed surface.
+#
+# Its limit is real and worth stating: `.git/hooks` is not versioned, so this protects the
+# checkout that ran `install.sh` and nothing else. `.github/workflows/ci.yml` covers every other
+# case by gating the deploy on the same rule.
+#
+# Branch names come from spec-kit.config.json (`branching.trunk`, `branching.integration`), read
+# at runtime. A trunk-only project (integration: null) skips the two integration-branch rules and
+# keeps the workflow check.
+#
+# Escape hatches, loud on purpose:
+#   ALLOW_BOARD_DRIFT=1 git push ...    the board check only
+#   ALLOW_MAIN_BYPASS=1 git push ...    the trunk-provenance and workflow checks only
+
+set -e
+
+REPO="$(git rev-parse --show-toplevel)"
+CFG="$REPO/spec-kit.config.json"
+SITE="$REPO/tools/docs-site"
+
+# An absent or unreadable config falls back to the conventional pair. A NULL integration branch
+# is not the same thing as an absent config: it means the project is trunk-only, so it resolves
+# to the empty string and the integration rules below simply never match a ref.
+TRUNK="$(node -e "const b=require('$CFG').branching||{};process.stdout.write(b.trunk||'main')" 2>/dev/null || echo main)"
+INTEGRATION="$(node -e "const b=require('$CFG').branching||{};const v=b.integration;process.stdout.write(v===null?'':String(v||'dev'))" 2>/dev/null || echo dev)"
+
+# stdin is consumed here AND needed by git-lfs, so keep a copy.
+REFS="$(cat)"
+
+pushing() {
+  [ -n "$1" ] || return 1
+  printf '%s\n' "$REFS" | awk -v r="refs/heads/$1" '$3 == r { found = 1 } END { exit !found }'
+}
+
+# A fresh clone that has never run `npm install` still has to be able to push. The checks are
+# skipped rather than failing, with the reason and the one command that restores them: a guard
+# that blocks work it cannot even run gets uninstalled, not fixed.
+#
+# The Git LFS chain at the bottom still runs. Exiting early here instead would silently disable
+# the hook Git LFS owns, which corrupts LFS pushes: a worse failure than the one being skipped.
+CHECKS=1
+if [ ! -d "$SITE/node_modules" ]; then
+  CHECKS=0
+  printf >&2 '  pre-push: skipping the board and workflow checks (no tools/docs-site/node_modules).\n'
+  printf >&2 '  Enable them with: cd tools/docs-site && npm install\n'
+fi
+
+# ── one ref at a time, integration first ─────────────────────────────────────────────
+# CI does not reliably create a workflow run per ref when one `git push` updates several. A
+# combined push has produced a run for the integration branch and none for the trunk, so nothing
+# deployed and nothing said so. That is exactly the silent failure this hook exists to remove, so
+# the combined push is refused rather than documented around.
+#
+# Push the integration branch FIRST, then the trunk. That order is forced by the workflow: its
+# provenance job checks the trunk's content against `origin/<integration>`, so that ref has to be
+# current before the trunk arrives. The board check below covers the window that ordering opens.
+if pushing "$INTEGRATION" && pushing "$TRUNK"; then
+  printf >&2 '\n  Blocked by tools/githooks/pre-push: push %s and %s separately, %s first.\n\n' "$INTEGRATION" "$TRUNK" "$INTEGRATION"
+  printf >&2 '      git push origin %s      # first: CI checks %s against origin/%s\n' "$INTEGRATION" "$TRUNK" "$INTEGRATION"
+  printf >&2 '      git push origin %s     # then: this is the deploy\n\n' "$TRUNK"
+  printf >&2 '  Why: CI creates a workflow run per pushed ref unreliably when one push updates\n'
+  printf >&2 '  several. A combined push has produced a run for %s and none for %s, so nothing\n' "$INTEGRATION" "$TRUNK"
+  printf >&2 '  deployed and nothing said so.\n\n'
+  exit 1
+fi
+
+if [ "$CHECKS" = "1" ] && [ "$ALLOW_BOARD_DRIFT" != "1" ] && pushing "$INTEGRATION" && ! pushing "$TRUNK"; then
+  # NOT --silent. It hides npm's own "Missing script" error, and a broken check then reports
+  # itself as board drift, which is a worse failure than the one being guarded: a guard that lies
+  # about WHY it fired teaches people to bypass it.
+  if ! (cd "$SITE" && npm run check:board); then
+    # The staged window. The integration branch has to be pushed before the trunk, because CI
+    # checks the trunk's content against `origin/<integration>`. So an integration push
+    # legitimately runs while `origin/<trunk>` is one merge behind. Allow it only when the local
+    # trunk ALREADY carries the statuses and is ahead of `origin/<trunk>`: the merge is done and
+    # the push is next.
+    #
+    # Said out loud before the answer, because the refusal above has already been printed: a
+    # REFUSING block followed by "Allowed" reads as a contradiction unless the reader can see
+    # that a second question is being asked.
+    printf >&2 '\n  check:board failed against origin/%s; checking whether local %s already carries\n' "$TRUNK" "$TRUNK"
+    printf >&2 '  these statuses (the staged-push window)...\n'
+    STAGED=0
+    if [ -n "$(git rev-list --count "origin/$TRUNK..$TRUNK" 2>/dev/null)" ] &&
+       [ "$(git rev-list --count "origin/$TRUNK..$TRUNK" 2>/dev/null)" != "0" ] &&
+       (cd "$SITE" && BOARD_BASE="$TRUNK" npm run --silent check:board >/dev/null 2>&1); then
+      STAGED=1
+    fi
+    if [ "$STAGED" = "1" ]; then
+      printf >&2 '\n  Allowed: local %s already carries these statuses and is ahead of origin/%s.\n' "$TRUNK" "$TRUNK"
+      printf >&2 '  Push it next, or the audience has nothing:\n\n      git push origin %s\n\n' "$TRUNK"
+    else
+      printf >&2 '\n  Blocked by tools/githooks/pre-push. Read the failure above: either the board is\n'
+      printf >&2 '  ahead of %s (merge to %s and push it, or hold the ticket) or the check is broken.\n' "$TRUNK" "$TRUNK"
+      printf >&2 '  Deliberate override: ALLOW_BOARD_DRIFT=1 git push origin %s\n\n' "$INTEGRATION"
+      exit 1
+    fi
+  fi
+fi
+
+# ── the trunk: only ever from the integration branch, and only with the automation intact ──
+if pushing "$TRUNK" && [ "$ALLOW_MAIN_BYPASS" != "1" ]; then
+  # The pre-check runs BEFORE the push is allowed through, not after: a trunk that the workflow
+  # can no longer publish is not a trunk worth pushing.
+  if [ "$CHECKS" = "1" ]; then
+    if ! (cd "$SITE" && npm run check:workflows); then
+      printf >&2 '\n  Blocked by tools/githooks/pre-push: the deploy automation is not intact.\n'
+      printf >&2 '  Reaching %s IS the publish, so a broken workflow means this push would land\n' "$TRUNK"
+      printf >&2 '  without ever reaching the audience. Fix the workflow, then push.\n\n'
+      exit 1
+    fi
+
+    # Every non-merge commit arriving on the trunk must already be on the integration branch.
+    # check-trunk-from-integration.mjs explains the rule and why a merge commit is exempt. Run
+    # per pushed ref so the range is the one git is actually about to send.
+    printf '%s\n' "$REFS" | awk -v r="refs/heads/$TRUNK" '$3 == r { print $4, $2 }' | while read -r remote_sha local_sha; do
+      [ -n "$local_sha" ] || continue
+      if ! PUSH_BEFORE="$remote_sha" PUSH_HEAD="$local_sha" node "$SITE/scripts/check-trunk-from-integration.mjs"; then
+        printf >&2 '\n  Blocked by tools/githooks/pre-push. %s is the release surface: land the work on\n' "$TRUNK"
+        printf >&2 '  %s first, then merge %s into %s. Override, if you truly mean it:\n' "$INTEGRATION" "$INTEGRATION" "$TRUNK"
+        printf >&2 '      ALLOW_MAIN_BYPASS=1 git push origin %s\n\n' "$TRUNK"
+        exit 1
+      fi
+    done || exit 1
+  fi
+fi
+
+# ── chain to Git LFS, which owns this hook by default ────────────────────────────────
+# Only when both halves hold: git-lfs is installed AND its filters are in play, either configured
+# (`git lfs install` writes them, usually globally) or declared by the root `.gitattributes`. The
+# config test is deliberately not `--local`: LFS is normally installed globally and a repo may
+# declare `filter=lfs` in a subdirectory's `.gitattributes`, so narrowing it would skip the chain
+# on a repo that genuinely needs it, which corrupts the push. A generic project matches neither
+# half, and a hook that fails on a tool it does not need is a hook people delete.
+if command -v git-lfs >/dev/null 2>&1; then
+  if git config --get-regexp '^filter\.lfs\.' >/dev/null 2>&1 ||
+     { [ -f "$REPO/.gitattributes" ] && grep -q 'filter=lfs' "$REPO/.gitattributes"; }; then
+    printf '%s\n' "$REFS" | git lfs pre-push "$@"
+  fi
+fi

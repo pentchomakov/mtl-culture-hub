@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* CDL's base palette and `@theme` maps, mirrored from the design library rather than
+   hand-copied. `npm run sync:cdl` refreshes it. CDL is the source of truth for these
+   tokens; project-specific things (`@source`, the base layer, the prose tweaks at the
+   bottom) stay in this file. */
+@import "./styles/cdl-tokens.css";
+
+/* A brand theme, when one exists, is imported HERE, after the tokens it overrides and
+   before anything else:
+
+     @import "./themes/acme.css";
+
+   None ships by default: base CDL greyscale is the design, `branding.theme` is null, and
+   no `data-theme` attribute is set. See `src/themes/index.ts` for the full recipe. */
+
+/* Tailwind v4 does not scan imported files by default, so the installed CDL
+   components' utility classes would never be generated, and layout silently collapses.
+   These are load-bearing, not tidiness. */
+@source "./components";
+@source "./lib";
+
+/* Dark mode is class-gated, not media-gated: CDL's `useColorMode` writes `.dark` on
+   <html>, and Auto resolves the OS preference itself. On Tailwind's `media` default every
+   dark variant would fire off the OS setting regardless of the theme control, giving a
+   half-themed page, which is what `darkMode: "class"` used to say in v3. v4 has no config
+   file, so the same intent is expressed as a custom variant. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* The shadcn base layer. Not part of the registry payload (a consuming project is
+   expected to already have it), so without this `body` keeps its browser defaults and
+   the page reads as black-on-black the moment the theme control switches to Dark. */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* The app owns the viewport; the DOCUMENT must never scroll.
+     `CdlPageContainer` sizes itself with `h-full`, which is parent-relative, so it
+     needs an unbroken 100%-height chain from <html> down to #root. A `h-screen` shell
+     (viewport-relative) needs no such chain, which is why these rules did not exist
+     before the CDL shell. Without them the container collapses to content height, the
+     document itself becomes the scroller, and macOS elastic overscroll pulls the whole
+     app away from the viewport edge, revealing the page background as a band above and
+     below the sidebar.
+
+     `overflow: hidden` removes the document scroller outright; scrolling belongs to the
+     content area inside `SidebarInset`. `overscroll-behavior: none` is belt-and-braces:
+     it also stops a flick that reaches the end of an inner scroller from chaining up and
+     bouncing the page. */
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  html,
+  body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}
+
+/* GitHub-Gist-ish rendered-markdown tweaks (paired with @tailwindcss/typography
+   `prose` + the highlight.js github theme imported in main.tsx). */
+.doc-prose pre.hljs {
+  border-radius: 0.5rem;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.5;
+}
+/* Readable base color for code blocks: @tailwindcss/typography's prose sets a
+   light `pre-code` color (meant for a dark bg), but the github hljs theme gives
+   us a white bg, so plain/untokenized code came out near-invisible grey.
+   Force the theme's own foreground; syntax-highlighted tokens keep their github
+   colors (higher specificity via .hljs-* classes). */
+.doc-prose pre.hljs,
+.doc-prose pre.hljs code {
+  color: #1e293b;
+}
+/* Neutralize prose's own <pre> styling so the hljs github theme shows through. */
+.doc-prose :where(pre):not(:where([class~="hljs"])) {
+  background: transparent;
+  padding: 0;
+}
+/* Dark mode: `highlight.js/styles/github.css` is the LIGHT github theme and is imported
+   unconditionally in main.tsx, so its white `pre` background survives the theme switch and
+   every code block becomes a glaring white island in an otherwise dark page. Rather than
+   swap stylesheets at runtime, re-surface the block on the theme's own tokens and let the
+   `.hljs-*` token colors (which carry enough contrast either way) stand. */
+:where(.dark) .doc-prose pre.hljs {
+  background: var(--muted);
+  border: 1px solid var(--border);
+}
+:where(.dark) .doc-prose pre.hljs,
+:where(.dark) .doc-prose pre.hljs code {
+  color: var(--foreground);
+}
+/* Mermaid diagrams render as inline SVG: center + allow horizontal scroll. */
+.doc-prose .mermaid-svg {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.doc-prose .mermaid-svg svg {
+  max-width: 100%;
+  height: auto;
+}

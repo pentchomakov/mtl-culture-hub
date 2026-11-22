@@ -1,0 +1,44 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* CDL's base palette and `@theme` maps, the same file the docs portal ships. CDL is the
+   source of truth for these tokens, so the two tools stay byte-identical here and
+   everything project-specific (the dark variant, the base layer, any brand theme) stays
+   in this file. */
+@import "./styles/cdl-tokens.css";
+
+/* A brand theme, when one exists, is imported HERE, after the tokens it overrides and
+   before anything else:
+
+     @import "./themes/acme.css";
+
+   None ships with the board: base CDL greyscale is the design, `branding.theme` is null,
+   and no `data-theme` attribute is set. When a project does register one, the overlay CSS
+   belongs to the project (the docs portal's `src/themes/` is the recipe) and the board
+   picks it up by the same `branding.theme` key. */
+
+/* No `@source` line: v4's automatic detection roots at the Vite project, which is
+   `tools/spec-board` itself, so `index.html` and everything under `src/` are already
+   scanned and the surrounding repo is not. Verified by build: adding the sources
+   explicitly produced a byte-identical stylesheet, and a class name planted in a ticket
+   markdown file outside the tool did NOT reach it. Add one only if a future part of the
+   board lives outside this directory. */
+
+/* Dark mode is class-gated, not media-gated: `useColorMode` writes `.dark` on <html>,
+   and Auto resolves the OS preference itself. On Tailwind's `media` default every dark
+   variant would fire off the OS setting regardless of the header control, giving a
+   half-themed board, which is what `darkMode: "class"` used to say in v3. v4 has no
+   config file, so the same intent is expressed as a custom variant. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* The shadcn base layer. Not part of the CDL token payload (a consuming project is
+   expected to already have it), so without this `body` keeps its browser defaults and
+   the board reads as black-on-black the moment the theme control switches to Dark. */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

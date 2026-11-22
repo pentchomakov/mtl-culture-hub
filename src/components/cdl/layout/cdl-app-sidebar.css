@@ -1,0 +1,11 @@
+[data-slot="sidebar-menu-button"][data-active="true"] {
+  border: 1px solid var(--sidebar-border);
+  font-weight: 400;
+}
+
+/* A group above a separator drops its bottom padding; the separator's padding is the gap.
+ * Second selector: a collapsible group keeps its padding on the inner SidebarGroup. */
+[data-cdl-nav-group]:has(+ [data-cdl-nav-separator]),
+[data-cdl-nav-group]:has(+ [data-cdl-nav-separator]) > [data-sidebar="group"] {
+  padding-bottom: 0;
+}

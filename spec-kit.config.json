@@ -1,0 +1,41 @@
+{
+  "name": "mtl-culture-hub",
+  "prefix": "MCH",
+  "specsDir": "specs",
+  "profile": "simple",
+  "//domain": "rendered from $HOME/.claude/skills/spec-init/domains/fullstack/domain.json; all = both skill sets on the transformation lifecycle",
+  "domain": "fullstack",
+  "//seed": "compass-app-template@68e19daa3a6c60c5082723a16ba12da603b9db46; set by item 13, appended to by a second seed",
+  "impacts": ["frontend", "backend", "db"],
+  "lifecycle": ["backlog", "in-progress", "pending-review", "shipped"],
+  "//lifecycleRoles": "which lifecycle status plays which part in the loop. The core skills bind these instead of naming a status, so one set of skills runs a dev lifecycle and a document lifecycle. start = work begun (/spec-start); review = awaiting review (/spec-start ends here); test = integrated and verified on the integration branch (/spec-test; null when the lifecycle has no such hop); done = terminal (/spec-ship). A stage with no role is walked by /spec-review.",
+  "lifecycleRoles": { "start": "in-progress", "review": "pending-review", "test": null, "done": "shipped" },
+  "branching": { "trunk": "main", "integration": "develop", "feature": "feat/" },
+  "deploy": { "staging": null, "prod": null },
+  "simSignoff": { "enabled": false, "triggerImpacts": [] },
+  "docs": {
+    "recurseDirs": ["docs"],
+    "rootFiles": ["README.md"],
+    "groups": [],
+    "home": "README.md",
+    "//buildCommand": "the project's own generator. /docs-build runs exactly this string and nothing else; null means docs/ is hand-written and there is no generator to run.",
+    "buildCommand": null
+  },
+  "branding": {
+    "//theme": "the client slug naming a Compass Design Library theme overlay: tools/docs-site/src/themes/<slug>.css for the viewers, src/themes/<slug>.css for the app. It is an overlay on the CDL shell, applied as html[data-theme=\"<slug>\"], never a replacement for it. null means the CDL default tokens, synced by npm run sync:cdl.",
+    "theme": null,
+    "//logo": "path to the client logo the sidebar logo slot renders, repo-relative. null means the sidebar falls back to an initials badge.",
+    "logo": null,
+    "//accent": "legacy alias kept so pre-theme configs keep working. theme wins when both are set; do not add accent to a new config.",
+    "accent": "emerald"
+  },
+  "//standards": "Compass standards mirrored into docs/reference/ by tools/standards/sync.mjs from compassanalytics/compass-standards, pinned to one commit so the project can say which version it was held to. /standards-sync re-pins and refreshes; a mirrored file is never edited by hand.",
+  "standards": {
+    "repo": "compassanalytics/compass-standards",
+    "ref": "176af68a7bea4e470dfac9fb88e93aa658c3057e",
+    "docs": [
+      { "path": "standards/application-development/general/application-development-standards.md", "to": "docs/reference/application-development-standards.md" },
+      { "path": "standards/application-development/general/coding-standards.md", "to": "docs/reference/coding-standards.md" }
+    ]
+  }
+}
